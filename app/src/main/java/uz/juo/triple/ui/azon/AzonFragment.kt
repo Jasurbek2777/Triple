@@ -181,6 +181,7 @@ class AzonFragment : Fragment() {
             })
             Snackbar.make(requireView(), "Alarms are  activated", Snackbar.LENGTH_SHORT)
                 .show()
+            SharedPreference.getInstance(requireContext()).hasAlarm=true
         }
 
 
