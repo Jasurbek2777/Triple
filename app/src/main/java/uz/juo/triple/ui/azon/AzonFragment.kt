@@ -59,10 +59,18 @@ class AzonFragment : Fragment() {
         val progressBar = binding.spinKit as ProgressBar
         val doubleBounce: Sprite = FadingCircle()
         progressBar.indeterminateDrawable = doubleBounce
+        showLoading()
         loadData()
 //        loadTest()
         binding.setBtn.setOnClickListener {
+            if (SharedPreference.getInstance(requireContext()).hasAlarm) {
+                Snackbar.make(requireView(), "Alarm is already active", Snackbar.LENGTH_SHORT)
+                    .show()
+            } else {
                 startAlert()
+                Snackbar.make(requireView(), "Alarms are  activated", Snackbar.LENGTH_SHORT)
+                    .show()
+            }
         }
         return binding.root
     }
@@ -139,12 +147,15 @@ class AzonFragment : Fragment() {
             }
             hideLoading()
         } else {
-            showLoading()
+            hideLoading()
             Toast.makeText(
                 requireContext(),
                 "Please check internet connection !",
                 Toast.LENGTH_SHORT
             ).show()
+            azonAdapter = AzonAdapter(requireContext(), db.getAll() as ArrayList<AzonEntity>)
+            binding.azonRv.adapter = azonAdapter
+            startAlert()
         }
     }
 
@@ -158,32 +169,26 @@ class AzonFragment : Fragment() {
 
     @RequiresApi(Build.VERSION_CODES.N)
     fun startAlert() {
-        if ( SharedPreference.getInstance(requireContext()).hasAlarm){
-            Snackbar.make(requireView(), "Alarm is already active", Snackbar.LENGTH_SHORT)
-                .show()
-        }else{
-            val intent = Intent(requireContext(), MyBroadcastReceiver::class.java)
-            var important = NotificationManager.IMPORTANCE_HIGH
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-                var not = NotificationChannel("id", "name", important)
-                not.description = "description"
-                var manager = getSystemService(
-                    requireContext(),
-                    NotificationManager::class.java
-                ) as NotificationManager
-                manager.createNotificationChannel(not)
-                intent.removeFlags(0)
-            }
-            var request = OneTimeWorkRequest.Builder(MyWorker::class.java).build()
-            WorkManager.getInstance().enqueue(request)
-            WorkManager.getInstance().getWorkInfoByIdLiveData(request.id).observe(viewLifecycleOwner, {
+
+        val intent = Intent(requireContext(), MyBroadcastReceiver::class.java)
+        var important = NotificationManager.IMPORTANCE_HIGH
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            var not = NotificationChannel("id", "name", important)
+            not.description = "description"
+            var manager = getSystemService(
+                requireContext(),
+                NotificationManager::class.java
+            ) as NotificationManager
+            manager.createNotificationChannel(not)
+            intent.removeFlags(0)
+        }
+        var request = OneTimeWorkRequest.Builder(MyWorker::class.java).build()
+        WorkManager.getInstance().enqueue(request)
+        WorkManager.getInstance().getWorkInfoByIdLiveData(request.id)
+            .observe(viewLifecycleOwner, {
 
             })
-            Snackbar.make(requireView(), "Alarms are  activated", Snackbar.LENGTH_SHORT)
-                .show()
-            SharedPreference.getInstance(requireContext()).hasAlarm=true
-        }
-
+        SharedPreference.getInstance(requireContext()).hasAlarm = true
 
     }
 

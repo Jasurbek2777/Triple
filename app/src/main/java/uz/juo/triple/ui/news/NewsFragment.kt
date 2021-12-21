@@ -25,6 +25,7 @@ import uz.juo.triple.models.news.Data
 import uz.juo.triple.models.news.NewsData
 import uz.juo.triple.paging.NewsSource
 import uz.juo.triple.retrofit.ApiClient
+import uz.juo.triple.utils.NetworkHelper
 import java.lang.Exception
 
 private const val ARG_PARAM1 = "param1"
@@ -55,21 +56,21 @@ class NewsFragment : Fragment() {
         val doubleBounce: Sprite = FadingCircle()
         progressBar.indeterminateDrawable = doubleBounce
         viewModel = ViewModelProvider(this)[NewsViewModel::class.java]
-        adapter = NewsAdapter(requireContext(),object :NewsAdapter.listen{
+        adapter = NewsAdapter(requireContext(), object : NewsAdapter.listen {
             override fun setOnClick(data: Data) {
                 try {
                     val url = data.url
                     val i = Intent(Intent.ACTION_VIEW)
                     i.data = Uri.parse(url)
                     startActivity(i)
-                }catch (e:Exception){
+                } catch (e: Exception) {
                     Toast.makeText(requireContext(), e.message, Toast.LENGTH_SHORT).show()
                 }
             }
         })
         binding.newsRv.adapter = adapter
         showLoading()
-//        loadData()
+        loadData()
         binding.swiper.setOnRefreshListener {
             loadData()
         }
@@ -86,12 +87,17 @@ class NewsFragment : Fragment() {
     }
 
     private fun loadData() {
-        viewModel.branches().observe(viewLifecycleOwner, {
-            lifecycleScope.launch {
-                adapter.submitData(it)
-            }
-        })
-        hideLoading()
+        if (NetworkHelper(requireContext()).isNetworkConnected()) {
+            viewModel.branches().observe(viewLifecycleOwner, {
+                lifecycleScope.launch {
+                    adapter.submitData(it)
+                }
+            })
+            hideLoading()
+        } else {
+            showLoading()
+        }
+
         binding.swiper.isRefreshing = false
     }
 

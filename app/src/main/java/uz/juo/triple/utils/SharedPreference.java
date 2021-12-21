@@ -21,12 +21,12 @@ public class SharedPreference {
 
     public void setHasAlarm(boolean hasLang) {
         editor = prefs.edit();
-        editor.putBoolean("alarm", hasLang);
+        editor.putBoolean("alarm1", hasLang);
         editor.apply();
     }
 
     public boolean getHasAlarm() {
-        return prefs.getBoolean("alarm", false);
+        return prefs.getBoolean("alarm1", false);
     }
 
 

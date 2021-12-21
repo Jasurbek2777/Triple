@@ -58,7 +58,6 @@ class MyBroadcastReceiver : BroadcastReceiver() {
         } else {
             context.startService(Intent(context, NotificationService::class.java))
         }
-//        context.startService(Intent(context, NotificationService::class.java))
         notifyReciver.putExtra("id", mp_id)
         val pendingIntentN = PendingIntent.getBroadcast(
             context.applicationContext, 0, notifyReciver, PendingIntent.FLAG_UPDATE_CURRENT

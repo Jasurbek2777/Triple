@@ -158,7 +158,9 @@ class WeatherFragment : Fragment() {
         temp?.text = data.current.temp.roundToInt().toString()
         desc?.text = data.current.weather[0].main
         bottomSheetDialog.show()
-        binding.save.isClickable = true
+        bottomSheetDialog.setOnCancelListener {
+            binding.save.isClickable = true
+        }
 
     }
 
